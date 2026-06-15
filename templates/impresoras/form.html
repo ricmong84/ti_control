@@ -1,0 +1,89 @@
+﻿{% extends "base.html" %}
+{% block title %}Reporte de impresora{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="mb-3">
+      {% if mode == 'edit' %}Editar reporte{% else %}Nuevo reporte{% endif %}
+    </h2>
+
+    <form method="post">
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label">IP *</label>
+          <select class="form-select" id="impSelect" name="impresora_id" required>
+            <option value="">-- Seleccionar IP --</option>
+            {% for i in impresoras %}
+              <option value="{{ i.id }}" {% if reporte and reporte.impresora_id == i.id %}selected{% endif %}>
+                {{ i.ip }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Serie (auto)</label>
+          <input class="form-control" id="serie" readonly value="{{ reporte.serie if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Modelo (auto)</label>
+          <input class="form-control" id="modelo" readonly value="{{ reporte.modelo if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Ubicación (auto)</label>
+          <input class="form-control" id="ubicacion" readonly value="{{ reporte.ubicacion if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Contacto *</label>
+          <input class="form-control" name="contacto" required value="{{ reporte.contacto if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Extensión</label>
+          <input class="form-control" name="extension" value="{{ reporte.extension if reporte and reporte.extension else '' }}">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Descripción del problema *</label>
+          <textarea class="form-control" name="descripcion" rows="4" required>{{ reporte.descripcion if reporte else '' }}</textarea>
+        </div>
+
+      </div>
+
+      <div class="mt-3 d-flex gap-2">
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <a href="{{ url_for('impresoras.reportes_list') }}" class="btn btn-outline-secondary">Volver</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const impSelect = document.getElementById("impSelect");
+  const serie = document.getElementById("serie");
+  const modelo = document.getElementById("modelo");
+  const ubicacion = document.getElementById("ubicacion");
+
+  async function fillAuto() {
+    if (!impSelect.value) {
+      serie.value = "";
+      modelo.value = "";
+      ubicacion.value = "";
+      return;
+    }
+    const r = await fetch(`/impresoras/api/${impSelect.value}`);
+    const d = await r.json();
+    serie.value = d.serie || "";
+    modelo.value = d.modelo || "";
+    ubicacion.value = d.ubicacion || "";
+  }
+
+  impSelect.addEventListener("change", fillAuto);
+  window.addEventListener("DOMContentLoaded", fillAuto);
+</script>
+{% endblock %}

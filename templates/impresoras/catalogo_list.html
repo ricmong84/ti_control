@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Catálogo de impresoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Catálogo de impresoras</h2>
+  <a href="{{ url_for('impresoras.catalogo_create') }}" class="btn btn-success">
+    + Nueva impresora
+  </a>
+</div>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-10">
+    <input class="form-control" name="q" placeholder="Buscar por IP, serie, modelo, ubicación o servidor" value="{{ q }}">
+  </div>
+  <div class="col-md-2 d-grid">
+    <button class="btn btn-outline-primary">Buscar</button>
+  </div>
+</form>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{cat}}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>IP</th>
+            <th>Serie</th>
+            <th>Modelo</th>
+            <th>Ubicación</th>
+            <th>Servidor</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in impresoras %}
+          <tr>
+            <td>{{ i.ip }}</td>
+            <td>{{ i.serie }}</td>
+            <td>{{ i.modelo }}</td>
+            <td>{{ i.ubicacion }}</td>
+            <td>{{ i.servidor }}</td>
+            <td class="text-end">
+              <div class="btn-group" role="group">
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{{ url_for('impresoras.catalogo_edit', imp_id=i.id) }}">
+                  Editar
+                </a>
+
+                <form action="{{ url_for('impresoras.catalogo_delete', imp_id=i.id) }}" method="post" class="d-inline">
+                  <button type="submit"
+                          class="btn btn-sm btn-outline-danger"
+                          data-confirm="¿Eliminar la impresora con IP {{ i.ip }}?">
+                    Eliminar
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              No hay impresoras registradas.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

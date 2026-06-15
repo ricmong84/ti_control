@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Inventario - Suministro{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">{% if mode == "edit" %}Editar suministro{% else %}Agregar suministro{% endif %}</h2>
+      <a href="{{ url_for('inventario.lista') }}" class="btn btn-outline-secondary">Volver</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" class="mt-3">
+      <div class="row g-3">
+
+        <div class="col-md-4">
+          <label class="form-label">Modelo *</label>
+          <input class="form-control" name="modelo" required
+                 placeholder="Ej: MX-711"
+                 value="{{ item.modelo if item else '' }}">
+        </div>
+
+        <div class="col-md-8">
+          <label class="form-label">Consumible *</label>
+          <input class="form-control" name="consumible" required
+                 placeholder="Ej: Toner / Unidad Imagen / Botella Desecho"
+                 value="{{ item.consumible if item else '' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Actual</label>
+          <input class="form-control" type="number" min="0" name="actual"
+                 value="{{ item.actual if item else 0 }}">
+          <div class="form-text">Stock actual (admin puede editar aquí).</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Mínimo</label>
+          <input class="form-control" type="number" min="0" name="minimo"
+                 value="{{ item.minimo if item else 0 }}">
+          <div class="form-text">Si Actual &lt; Mínimo, se marca en rojo.</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Máximo</label>
+          <input class="form-control" type="number" min="0" name="maximo"
+                 value="{{ item.maximo if item and item.maximo is not none else '' }}">
+          <div class="form-text">Opcional (puede quedar vacío).</div>
+        </div>
+
+      </div>
+
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <a href="{{ url_for('inventario.lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+'@ | Set-Content -Encoding utf8 .\templates\inventario\form.html

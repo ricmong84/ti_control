@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Activo{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="mb-3">{% if mode == 'edit' %}Editar activo{% else %}Agregar activo{% endif %}</h2>
+
+    <form method="post">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Placa SIFA *</label>
+          <input class="form-control" name="placa_sifa" required value="{{ activo.placa_sifa if activo else '' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Serie / Service Tag</label>
+          <input class="form-control" name="serie_service_tag" value="{{ activo.serie_service_tag if activo else '' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Marca</label>
+          <input class="form-control" name="marca" value="{{ activo.marca if activo else '' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Modelo</label>
+          <input class="form-control" name="modelo" value="{{ activo.modelo if activo else '' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Tipo de equipo</label>
+          <input class="form-control" name="tipo_equipo" value="{{ activo.tipo_equipo if activo else '' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">IP</label>
+          <input class="form-control" name="ip" value="{{ activo.ip if activo else '' }}">
+        </div>
+      </div>
+
+      <div class="mt-4 d-flex gap-2">
+
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <a href="{{ url_for('activos.activos_list') }}" class="btn btn-outline-secondary">Volver</a>
+
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

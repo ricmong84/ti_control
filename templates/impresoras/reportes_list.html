@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Reportes de impresoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Reportes de impresoras</h2>
+  <a href="{{ url_for('impresoras.reportes_create') }}" class="btn btn-success">
+    + Nuevo reporte
+  </a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{cat}}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<!-- ✅ BUSCADOR (GET) - Va aquí -->
+<form class="row g-2 mb-3" method="get" action="{{ url_for('impresoras.reportes_list') }}">
+  <div class="col-md-10">
+    <input class="form-control"
+           name="q"
+           placeholder="Buscar por IP, modelo, contacto o ubicación..."
+           value="{{ q or '' }}">
+  </div>
+  <div class="col-md-2 d-grid">
+    <button class="btn btn-outline-primary" type="submit">Buscar</button>
+  </div>
+</form>
+
+{% if q %}
+  <div class="mb-3 d-flex align-items-center gap-2">
+    <a href="{{ url_for('impresoras.reportes_list') }}" class="btn btn-sm btn-outline-secondary">
+      Limpiar filtro
+    </a>
+    <span class="text-muted">Filtrando por: <strong>{{ q }}</strong></span>
+  </div>
+{% endif %}
+
+<!-- ✅ EXPORT (POST) - Se queda como lo tenías -->
+<form action="{{ url_for('impresoras.reportes_export') }}" method="post">
+  <div class="d-flex gap-2 mb-3">
+    <button class="btn btn-outline-primary" type="submit">
+      Exportar seleccionados
+    </button>
+    <button class="btn btn-primary" type="submit" name="export_all" value="1">
+      Exportar todo
+    </button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th style="width:40px">
+                <input type="checkbox" id="checkAll">
+              </th>
+              <th>Fecha</th>
+              <th>IP</th>
+              <th>Modelo</th>
+              <th>Ubicación</th>
+              <th>Contacto</th>
+              <th>Ext.</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for r in reportes %}
+            <tr>
+              <td>
+                <input class="rowCheck" type="checkbox" name="selected_ids" value="{{ r.id }}">
+              </td>
+              <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+              <td>{{ r.ip }}</td>
+              <td>{{ r.modelo }}</td>
+              <td>{{ r.ubicacion }}</td>
+              <td>{{ r.contacto }}</td>
+              <td>{{ r.extension or '' }}</td>
+
+              <td class="text-end">
+                <div class="btn-group" role="group">
+                  <a class="btn btn-sm btn-outline-secondary"
+                     href="{{ url_for('impresoras.reportes_edit', rep_id=r.id) }}">
+                    Editar
+                  </a>
+
+                  <!-- ✅ Sin form anidado: usa formaction dentro del mismo form -->
+                  <button class="btn btn-sm btn-outline-danger"
+                          type="submit"
+                          formmethod="post"
+                          formaction="{{ url_for('impresoras.reportes_delete', rep_id=r.id) }}"
+                          data-confirm="¿Eliminar este reporte?">
+                    Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">
+                No hay reportes todavía.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+  const checkAll = document.getElementById("checkAll");
+  const rows = () => document.querySelectorAll(".rowCheck");
+
+  checkAll?.addEventListener("change", () => {
+    rows().forEach(cb => cb.checked = checkAll.checked);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Reporte de equipo{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="mb-3">{% if mode == 'edit' %}Editar reporte{% else %}Nuevo reporte{% endif %}</h2>
+
+    <form method="post">
+      <div class="row g-3">
+
+        <!-- Placa SIFA -->
+        <div class="col-md-6">
+          <label class="form-label">Placa SIFA</label>
+          <input class="form-control" id="placa_sifa" name="placa_sifa"
+                 list="placasList"
+                 value="{{ reporte.placa_sifa if reporte else '' }}"
+                 placeholder="Escribe o selecciona una placa">
+          <datalist id="placasList">
+            {% for a in activos %}
+              <option value="{{ a.placa_sifa }}"></option>
+            {% endfor %}
+          </datalist>
+        </div>
+
+        <!-- Dirección IP -->
+        <div class="col-md-6">
+          <label class="form-label">Dirección IP</label>
+          <input class="form-control" id="direccion_ip" name="direccion_ip"
+                 value="{{ reporte.direccion_ip if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Serie / Service Tag</label>
+          <input class="form-control" id="serie_service_tag" name="serie_service_tag"
+                 value="{{ reporte.serie_service_tag if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Marca</label>
+          <input class="form-control" id="marca" name="marca"
+                 value="{{ reporte.marca if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Modelo</label>
+          <input class="form-control" id="modelo" name="modelo"
+                 value="{{ reporte.modelo if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Tipo de equipo</label>
+          <input class="form-control" id="tipo_equipo" name="tipo_equipo"
+                 value="{{ reporte.tipo_equipo if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Usuario que reporta *</label>
+          <input class="form-control" name="usuario_reporta" required
+           value="{{ reporte.usuario_reporta if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+         <label class="form-label">Ubicación</label>
+         <input class="form-control" name="ubicacion"
+         value="{{ reporte.ubicacion if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Técnico</label>
+          <input class="form-control" name="tecnico"
+          value="{{ reporte.tecnico if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+        <label class="form-label">Edificio</label>
+        <input class="form-control" name="edificio"
+         value="{{ reporte.edificio if reporte else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">SAS</label>
+          <input class="form-control" name="sas"
+                value="{{ reporte.sas if reporte else '' }}">
+        </div>
+
+
+        <div class="col-md-6">
+          <label class="form-label">Extensión</label>
+          <input class="form-control" name="extension"
+          value="{{ reporte.extension if reporte else '' }}">
+        </div>
+
+        {% if mode == 'edit' %}
+        <div class="col-md-6">
+          <label class="form-label">Estado</label>
+          <select class="form-select" name="estado">
+            <option value="pendiente" {% if reporte.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+            <option value="atendido" {% if reporte.estado == 'atendido' %}selected{% endif %}>Atendido</option>
+          </select>
+        </div>
+        {% endif %}
+
+        <div class="col-12">
+          <label class="form-label">Observaciones *</label>
+          <textarea class="form-control" name="observaciones" rows="4" required>{{ reporte.observaciones if reporte else '' }}</textarea>
+        </div>
+
+      </div>
+
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-success" type="submit">Guardar</button>
+
+         {% if current_user.role == 'admin' %}
+          <a class="btn btn-outline-secondary" href="{{ url_for('admin.dashboard') }}">Volver</a>
+          {% else %}
+        <a class="btn btn-outline-secondary" href="{{ url_for('user.dashboard') }}">Volver</a>
+          {% endif %}
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const placa = document.getElementById("placa_sifa");
+  const ip = document.getElementById("direccion_ip");
+  const serie = document.getElementById("serie_service_tag");
+  const marca = document.getElementById("marca");
+  const modelo = document.getElementById("modelo");
+  const tipo = document.getElementById("tipo_equipo");
+
+  async function fillFromPlaca() {
+    const val = placa.value.trim();
+
+    if (val !== "") {
+      ip.value = "";
+      ip.disabled = true;
+
+      const r = await fetch(`/activos/api/placa/${encodeURIComponent(val)}`);
+      const d = await r.json();
+
+      if (d.ok) {
+        serie.value = d.serie_service_tag || "";
+        marca.value = d.marca || "";
+        modelo.value = d.modelo || "";
+        tipo.value = d.tipo_equipo || "";
+      }
+    } else {
+      ip.disabled = false;
+    }
+  }
+
+  placa.addEventListener("input", fillFromPlaca);
+  window.addEventListener("DOMContentLoaded", fillFromPlaca);
+</script>
+{% endblock %}

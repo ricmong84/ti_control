@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{% if mode=="create" %}Crear Usuario{% else %}Editar Usuario{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="mb-3">
+      {% if mode=="create" %}Crear Usuario{% else %}Editar Usuario{% endif %}
+    </h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{cat}}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">Usuario</label>
+        <input class="form-control" name="username"
+               value="{{ u.username if u else '' }}"
+               required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Rol</label>
+        <select class="form-select" name="role">
+          <option value="user" {% if u and u.role=="user" %}selected{% endif %}>user</option>
+          <option value="admin" {% if u and u.role=="admin" %}selected{% endif %}>admin</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          Contraseña
+          {% if mode=="edit" %}
+            <small class="text-muted">(dejar en blanco para no cambiar)</small>
+          {% endif %}
+        </label>
+        <input class="form-control" name="password" type="password"
+               {% if mode=="create" %}required{% endif %}>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <a class="btn btn-secondary" href="{{ url_for('admin.users_list') }}">Volver</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

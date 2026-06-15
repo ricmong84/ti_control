@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{% if mode=="create" %}Crear CECO{% else %}Editar CECO{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="mb-3">
+      {% if mode=="create" %}Crear CECO{% else %}Editar CECO{% endif %}
+    </h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{cat}}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">CECO</label>
+        <input class="form-control" name="ceco"
+               value="{{ c.ceco if c else '' }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Nombre Jefatura</label>
+        <input class="form-control" name="nombre"
+               value="{{ c.nombre_jefatura if c else '' }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Área</label>
+        <input class="form-control" name="area"
+               value="{{ c.area if c else '' }}" required>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-success" type="submit">Guardar</button>
+        <a class="btn btn-secondary" href="{{ url_for('ceco.list_ceco') }}">Volver</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+/* Fondo profesional con degradado y textura suave */
+.login-bg {
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 10%, #1f4e79 0%, #0b1f33 35%, #060a12 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* “Burbujas” sutiles decorativas */
+.login-bg::before,
+.login-bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.35;
+}
+
+.login-bg::before {
+  width: 360px;
+  height: 360px;
+  background: #2ea3ff;
+  top: -120px;
+  left: -120px;
+}
+
+.login-bg::after {
+  width: 420px;
+  height: 420px;
+  background: #00d4a6;
+  bottom: -160px;
+  right: -160px;
+}
+
+.login-card {
+  width: 420px;
+  border: 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(6px);
+}
+
+.login-logo {
+  height: 56px;
+  object-fit: contain;
+}
+
+.small-muted {
+  font-size: 0.9rem;
+  color: #6c757d;
+}

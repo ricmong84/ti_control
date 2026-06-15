@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Catálogo de activos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">Catálogo de activos</h2>
+  <a href="{{ url_for('activos.activos_create') }}" class="btn btn-success">
+    + Agregar activo
+  </a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-10">
+    <input
+      class="form-control"
+      name="q"
+      value="{{ q or '' }}"
+      placeholder="Buscar por placa, serie, marca, modelo, tipo o IP..."
+    >
+  </div>
+  <div class="col-md-2 d-grid">
+    <button class="btn btn-outline-primary" type="submit">Buscar</button>
+  </div>
+</form>
+
+{% if q %}
+  <div class="mb-3 d-flex align-items-center gap-2">
+    <a href="{{ url_for('activos.activos_list') }}" class="btn btn-sm btn-outline-secondary">
+      Limpiar filtro
+    </a>
+    <span class="text-muted">Filtrando por: <strong>{{ q }}</strong></span>
+  </div>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card shadow-sm">
+  <div class="card-body table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Placa SIFA</th>
+          <th>Serie / Service Tag</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Tipo</th>
+          <th>IP</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in activos %}
+        <tr>
+          <td>{{ a.placa_sifa }}</td>
+          <td>{{ a.serie_service_tag or '' }}</td>
+          <td>{{ a.marca or '' }}</td>
+          <td>{{ a.modelo or '' }}</td>
+          <td>{{ a.tipo_equipo or '' }}</td>
+          <td>{{ a.ip or '' }}</td>
+          <td class="text-end">
+            <div class="d-inline-flex gap-2">
+              <a
+                href="{{ url_for('activos.activos_edit', activo_id=a.id) }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                Editar
+              </a>
+
+              <form
+                action="{{ url_for('activos.activos_delete', activo_id=a.id) }}"
+                method="post"
+                class="d-inline"
+              >
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  type="submit"
+                  data-confirm="¿Eliminar este activo?"
+                >
+                  Eliminar
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            No hay activos registrados.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

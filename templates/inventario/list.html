@@ -1,0 +1,159 @@
+﻿{% extends "base.html" %}
+{% block title %}Inventario de suministros{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">Inventario Suministros Lexmark</h2>
+
+  <div class="d-flex gap-2 align-items-center">
+    <!-- Buscador -->
+    <form method="get" class="d-flex gap-2 mb-0">
+      <input class="form-control" name="q" value="{{ q or '' }}" placeholder="Buscar modelo o consumible...">
+      <button class="btn btn-outline-primary" type="submit">Buscar</button>
+    </form>
+
+    <!-- Export bajo mínimo -->
+    <a id="exportLowBtn"
+       href="{{ url_for('inventario.export_bajo_minimo') }}"
+       class="btn btn-danger {% if not has_low %}disabled{% endif %}"
+       {% if not has_low %}aria-disabled="true" tabindex="-1"{% endif %}>
+      Exportar bajo mínimo
+    </a>
+
+    <!-- CRUD: Agregar suministro (solo admin) -->
+    {% if current_user.role == 'admin' %}
+      <a href="{{ url_for('inventario.create') }}" class="btn btn-success">
+        + Agregar suministro
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<p class="text-muted mb-3">
+  El campo <strong>Actual</strong> se pone <span class="text-danger"><strong>rojo</strong></span> si está por debajo del mínimo,
+  y <span class="text-success"><strong>verde</strong></span> si está igual o por encima del mínimo.
+</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{cat}}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card shadow-sm">
+  <div class="card-body table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th style="width:120px;">Modelo</th>
+          <th>Consumible</th>
+          <th style="width:180px;">Actual</th>
+          <th style="width:110px;">Mínimo</th>
+          <th style="width:110px;">Máximo</th>
+
+          {% if current_user.role == 'admin' %}
+            <th style="width:170px;">Acciones</th>
+          {% endif %}
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for modelo, items in grouped.items() %}
+          {% for it in items %}
+          <tr>
+            {% if loop.first %}
+              <td rowspan="{{ items|length }}" class="fw-bold text-center bg-light" style="border: 3px solid rgb(69, 60, 60);">
+              {{ modelo }}
+            </td>
+
+            {% endif %}
+
+            <td style="border: 2px solid black;">{{ it.consumible }}</td>
+
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-secondary adjust-btn"
+                        type="button" data-id="{{ it.id }}" data-delta="-1">-</button>
+
+                <span id="actual-{{ it.id }}"
+                      class="badge px-3 py-2 {% if it.actual < it.minimo %}bg-danger{% else %}bg-success{% endif %}">
+                  {{ it.actual }}
+                </span>
+
+                <button class="btn btn-sm btn-outline-secondary adjust-btn"
+                        type="button" data-id="{{ it.id }}" data-delta="1">+</button>
+              </div>
+            </td>
+
+            <td class="text-center">{{ it.minimo }}</td>
+            <td class="text-center">{{ it.maximo if it.maximo is not none else "" }}</td>
+
+            {% if current_user.role == 'admin' %}
+              <td>
+                <div class="btn-group" role="group">
+                  <a class="btn btn-sm btn-outline-primary"
+                     href="{{ url_for('inventario.edit', item_id=it.id) }}">
+                    Editar
+                  </a>
+
+                  <form method="post"
+                        action="{{ url_for('inventario.delete', item_id=it.id) }}"
+                        class="d-inline">
+                    <button class="btn btn-sm btn-outline-danger"
+                            type="submit"
+                            data-confirm="¿Eliminar este suministro?">
+                      Eliminar
+                    </button>
+                  </form>
+                </div>
+              </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  async function adjust(id, delta){
+    const res = await fetch(`/inventario/${id}/adjust`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({delta: delta})
+    });
+
+    const data = await res.json();
+    if(!data.ok) return;
+
+    const badge = document.getElementById(`actual-${id}`);
+    badge.textContent = data.actual;
+
+    badge.classList.remove("bg-danger","bg-success");
+    badge.classList.add(data.is_low ? "bg-danger" : "bg-success");
+
+    const anyLow = document.querySelectorAll("span[id^='actual-'].bg-danger").length > 0;
+    const btn = document.getElementById("exportLowBtn");
+    if(btn){
+      if(anyLow){
+        btn.classList.remove("disabled");
+        btn.removeAttribute("aria-disabled");
+        btn.removeAttribute("tabindex");
+      } else {
+        btn.classList.add("disabled");
+        btn.setAttribute("aria-disabled","true");
+        btn.setAttribute("tabindex","-1");
+      }
+    }
+  }
+
+  document.querySelectorAll(".adjust-btn").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      adjust(b.dataset.id, parseInt(b.dataset.delta));
+    });
+  });
+</script>
+{% endblock %}
